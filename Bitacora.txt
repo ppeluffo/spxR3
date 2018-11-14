@@ -1,0 +1,39 @@
+Bitacora de cambios de Firmware SPXR3
+
+-----------------------------------------------------------------------
+2018-Nov-13:
+Version 1.0.0
+Version inicial basada en el SPXR1.
+Se modifica para las nuevas placas R3 en las cuales tenemos una placa
+externa de conexiones y otra de comunicaciones.
+Esto hace que el bluetoot y el usb desaparezcan del firmware y pase a
+manejar solo una puerto serial para terminal.
+Esto implica modificar los drivers de uart y el Frtos-IO.
+1-Elimino todo lo referente al XBEE
+2-Elimino lo referente al protocolo UTE. Estos dataloggers no se usan 
+  en UTE sino que se deben usar los spxR3_IO8.
+3-Solo tenemos 2 entradas digitales de nivel ( en reposo HIGH ) y dos
+  entradas de contador ( en reposo HIGH )
+4-Contadores:
+  El tiempo de debounced de los contadores esta en 50ms.
+  Prueba con los flujimentros:
+  Soplando con toda fuerza logro una frecuencia de 200Hz para lo cual
+  deberia poner un debounced de 5ms con lo que queda menos inmune al 
+  ruido.( se nota al poner pulsos a mano )
+  Con un debounced de 100ms, la fmax=10Hz pero rechaza muy bien los pulsos.
+  La alternativa es dejar un debounce en 50ms. En particular en los flujimentros
+  aunque perdiesemos pulsos no importaria.
+  Boton:
+  
+5-Leo la causa del reset y lo muestro en status y lo envio en el primer INIT.
+  Se borra al recibir el ACK del init del server
+6-Corrijo un bug en la espera en modo CONTINUO para rediscar. 
+  No tengo que monitorear la flag frame_ready ya que la espera no es mas
+  de 60s.
+7-Corrijo los fuses para que el FUSE1 sea 0xAA.
+  
+** Pendiente de revision: watchdogs,rangeMeter, outputs, modo SP5K
+** Pendiente de programacion:
+	- Memoria circular
+-----------------------------------------------------------------------
+ 
