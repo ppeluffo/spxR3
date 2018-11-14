@@ -43,6 +43,8 @@ uint8_t channel;
 		systemVars.imax[channel] = 20;
 		systemVars.mmin[channel] = 0;
 		systemVars.mmax[channel] = 6.0;
+		systemVars.mag_offset[channel] = 0.0;
+
 		snprintf_P( systemVars.a_ch_name[channel], PARAMNAME_LENGTH, PSTR("A%d\0"),channel );
 
 	}
@@ -162,7 +164,8 @@ float an_mag_val;
 float I,M,P;
 uint16_t D;
 
-	an_raw_val =ACH_read_channel(channel);
+	an_raw_val = ACH_read_channel(channel);
+//	xprintf_P( PSTR("ANRAW=%d\r\n\0"), an_raw_val );
 	*raw_val = an_raw_val;
 
 	// Convierto el raw_value a la magnitud
@@ -179,8 +182,9 @@ uint16_t D;
 		P = (float) ( systemVars.mmax[channel]  -  systemVars.mmin[channel] ) / D;
 		// Magnitud
 		M = (float) (systemVars.mmin[channel] + ( I - systemVars.imin[channel] ) * P);
-		an_mag_val = M;
 
+		// Al calcular la magnitud utilizo el offset.
+		an_mag_val = M + systemVars.mag_offset[channel];
 	} else {
 		// Error: denominador = 0.
 		an_mag_val = -999.0;
@@ -207,5 +211,61 @@ float mag_val;
 
 }
 //------------------------------------------------------------------------------------
+bool pub_analog_autocalibrar( uint8_t channel, char *s_mag_val )
+{
+	// Para un canal, toma como entrada el valor de la magnitud y ajusta
+	// mag_offset para que la medida tomada coincida con la dada.
 
+
+uint16_t an_raw_val;
+float an_mag_val;
+float I,M,P;
+uint16_t D;
+
+float an_mag_val_real;
+float offset;
+
+	if ( channel >= NRO_ANALOG_CHANNELS ) {
+		return(false);
+	}
+
+	// Leo el canal
+	an_raw_val = ACH_read_channel(channel);
+//	xprintf_P( PSTR("ANRAW=%d\r\n\0"), an_raw_val );
+
+	// Convierto el raw_value a la magnitud
+	I = (float)( an_raw_val) * 20 / ( systemVars.coef_calibracion[channel] + 1);
+	P = 0;
+	D = systemVars.imax[channel] - systemVars.imin[channel];
+
+	an_mag_val = 0.0;
+	if ( D != 0 ) {
+		// Pendiente
+		P = (float) ( systemVars.mmax[channel]  -  systemVars.mmin[channel] ) / D;
+		// Magnitud
+		M = (float) (systemVars.mmin[channel] + ( I - systemVars.imin[channel] ) * P);
+
+		// En este caso el offset que uso es 0 !!!.
+		an_mag_val = M;
+
+	} else {
+		return(false);
+	}
+
+//	xprintf_P( PSTR("ANMAG=%.02f\r\n\0"), an_mag_val );
+
+	an_mag_val_real = atof(s_mag_val);
+//	xprintf_P( PSTR("ANMAG_T=%.02f\r\n\0"), an_mag_val_real );
+
+	offset = an_mag_val_real - an_mag_val;
+//	xprintf_P( PSTR("AUTOCAL offset=%.02f\r\n\0"), offset );
+
+	systemVars.mag_offset[channel] = offset;
+
+	xprintf_P( PSTR("COEF_CAL=%.02f\r\n\0"), systemVars.mag_offset[channel] );
+
+	return(true);
+
+}
+//------------------------------------------------------------------------------------
 

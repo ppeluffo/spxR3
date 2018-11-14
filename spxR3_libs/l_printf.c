@@ -75,8 +75,8 @@ int xnprint( const char *pvBuffer, const uint16_t xBytes )
 int bytes2wr = 0;
 
 	// SI la terminal esta desconectada salgo.
-	if ( IO_read_TERMCTL_PIN() == 0 )
-		return(bytes2wr);
+//	if ( IO_read_TERMCTL_PIN() == 0 )
+//		return(bytes2wr);
 
 //	frtos_ioctl (fdUSB,ioctl_OBTAIN_BUS_SEMPH, NULL );
 //	frtos_ioctl (fdBT,ioctl_OBTAIN_BUS_SEMPH, NULL );

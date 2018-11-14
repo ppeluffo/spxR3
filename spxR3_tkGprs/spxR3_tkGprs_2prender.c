@@ -44,7 +44,7 @@ bool exit_flag = bool_RESTART;
 // Loop:
 	for ( hw_tries = 0; hw_tries < MAX_HW_TRIES_PWRON; hw_tries++ ) {
 
-		pub_gprs_modem_pwr_on();
+		pub_gprs_modem_pwr_on( hw_tries );
 
 		// Reintento prenderlo activando el switch pin
 		for ( sw_tries = 0; sw_tries < MAX_SW_TRIES_PWRON; sw_tries++ ) {
@@ -58,7 +58,7 @@ bool exit_flag = bool_RESTART;
 			pv_gprs_rxbuffer_flush();
 
 			// Espero 10s para interrogarlo
-			vTaskDelay( (portTickType)( 10000 / portTICK_RATE_MS ) );
+			vTaskDelay( (portTickType)( ( 10000 + ( 5000 * sw_tries ) ) / portTICK_RATE_MS ) );
 
 			// Mando un AT y espero un OK para ver si prendio y responde.
 			pub_gprs_flush_RX_buffer();
@@ -83,7 +83,7 @@ bool exit_flag = bool_RESTART;
 		}
 
 		// No prendio luego de MAX_SW_TRIES_PWRON intentos SW. Apago y prendo de nuevo
-		pub_gprs_modem_pwr_on();									// Apago la fuente
+		pub_gprs_modem_pwr_off();									// Apago la fuente
 		vTaskDelay( (portTickType)( 10000 / portTICK_RATE_MS ) );	// Espero 10s antes de reintentar
 	}
 

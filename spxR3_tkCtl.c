@@ -21,12 +21,12 @@ static uint16_t watchdog_timers[NRO_WDGS];
 // Timpo que espera la tkControl entre round-a-robin
 #define TKCTL_DELAY_S	5
 
-// La tarea pasa por el mismo lugar c/1s.
+// La tarea pasa por el mismo lugar c/5s.
 #define WDG_CTL_TIMEOUT	30
 
 const char string_0[] PROGMEM = "CMD";
 const char string_1[] PROGMEM = "CTL";
-const char string_2[] PROGMEM = "DIN";
+const char string_2[] PROGMEM = "CNT";
 const char string_3[] PROGMEM = "DAT";
 const char string_4[] PROGMEM = "OUT";
 const char string_5[] PROGMEM = "GRX";
@@ -156,6 +156,7 @@ static void pv_tkCtl_check_wdg(void)
 
 		// Cada ciclo reseteo el wdg para que no expire.
 		WDT_Reset();
+		//pub_ctl_print_wdg_timers();
 		//return;
 
 		// Si algun WDG no se borro, me reseteo
@@ -261,7 +262,7 @@ void pub_ctl_watchdog_kick(uint8_t taskWdg, uint16_t timeout_in_secs )
 	while ( xSemaphoreTake( sem_SYSVars, ( TickType_t ) 5 ) != pdTRUE )
 		taskYIELD();
 
-	watchdog_timers[taskWdg] = (uint16_t) ( timeout_in_secs / TKCTL_DELAY_S );
+	watchdog_timers[taskWdg] = timeout_in_secs;
 
 	xSemaphoreGive( sem_SYSVars );
 }

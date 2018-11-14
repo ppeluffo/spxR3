@@ -67,7 +67,7 @@ void pv_gprs_rxbuffer_poke(char c);
 
 bool pub_gprs_check_response( const char *rsp );
 void pub_gprs_modem_pwr_off(void);
-void pub_gprs_modem_pwr_on(void);
+void pub_gprs_modem_pwr_on(uint8_t pwr_time );
 void pub_gprs_modem_pwr_sw(void);
 void pub_gprs_flush_RX_buffer(void);
 void pub_gprs_flush_TX_buffer(void);

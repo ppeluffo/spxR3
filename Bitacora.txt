@@ -6,9 +6,10 @@ Version 1.0.0
 Version inicial basada en el SPXR1.
 Se modifica para las nuevas placas R3 en las cuales tenemos una placa
 externa de conexiones y otra de comunicaciones.
-Esto hace que el bluetoot y el usb desaparezcan del firmware y pase a
+Esto hace que el bluetooth y el usb desaparezcan del firmware y pase a
 manejar solo una puerto serial para terminal.
 Esto implica modificar los drivers de uart y el Frtos-IO.
+
 1-Elimino todo lo referente al XBEE
 2-Elimino lo referente al protocolo UTE. Estos dataloggers no se usan 
   en UTE sino que se deben usar los spxR3_IO8.
@@ -31,8 +32,12 @@ Esto implica modificar los drivers de uart y el Frtos-IO.
   No tengo que monitorear la flag frame_ready ya que la espera no es mas
   de 60s.
 7-Corrijo los fuses para que el FUSE1 sea 0xAA.
+8-Si el modem no prende de primera, debo poner tiempos de settle progresivos.
+9-Autocalibracion: Incorporo un offset que se suma a las medidas. Este se
+  autocalibra desde el modo cmd.
+  Tambien agrego un comando que configura el offset directamente.
   
-** Pendiente de revision: watchdogs,rangeMeter, outputs, modo SP5K
+** Pendiente de revision: rangeMeter, outputs, modo SP5K
 ** Pendiente de programacion:
 	- Memoria circular
 -----------------------------------------------------------------------

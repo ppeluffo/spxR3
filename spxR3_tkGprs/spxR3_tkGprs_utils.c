@@ -100,13 +100,13 @@ void pub_gprs_modem_pwr_off(void)
 
 }
 //------------------------------------------------------------------------------------
-void pub_gprs_modem_pwr_on(void)
+void pub_gprs_modem_pwr_on(uint8_t pwr_time )
 {
 	// Prendo la fuente del modem
 
 	IO_clr_GPRS_SW();	// GPRS=0V, PWR_ON pullup 1.8V )
 	IO_set_GPRS_PWR();											// Prendo la fuente ( alimento al modem ) HW
-	vTaskDelay( (portTickType)( 2000 / portTICK_RATE_MS ) );	// Espero 2s que se estabilize la fuente.
+	vTaskDelay( (portTickType)( ( 2000 + 2000 * pwr_time) / portTICK_RATE_MS ) );	// Espero 2s que se estabilize la fuente.
 
 
 }

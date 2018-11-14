@@ -56,8 +56,8 @@
 //------------------------------------------------------------------------------------
 // DEFINES
 //------------------------------------------------------------------------------------
-#define SPX_FW_REV "1.0.0"
-#define SPX_FW_DATE "@ 20181113"
+#define SPX_FW_REV "1.0.0.R3"
+#define SPX_FW_DATE "@ 20181114"
 
 #define SPX_HW_MODELO "spxR3 HW:xmega256A3B R1.1"
 #define SPX_FTROS_VERSION "FW:FRTOS10 TICKLESS"
@@ -229,6 +229,7 @@ typedef struct {
 	float mmin[NRO_ANALOG_CHANNELS];
 	float mmax[NRO_ANALOG_CHANNELS];
 	char a_ch_name[NRO_ANALOG_CHANNELS][PARAMNAME_LENGTH];
+	float mag_offset[NRO_ANALOG_CHANNELS];
 
 	// Configuracion de canales digitales
 	char d_ch_name[NRO_DIGITAL_CHANNELS][PARAMNAME_LENGTH];
@@ -303,6 +304,7 @@ void pub_analog_read_battery ( float *mag_val );
 void pub_analog_read_frame(st_analog_inputs_t *analog_frame );
 void pub_analog_prender_12vsensor ( void );
 void pub_analog_apagar_12vsensor ( void );
+bool pub_analog_autocalibrar( uint8_t channel, char *s_mag_val );
 
 // tkData
 void pub_data_print_frame(bool wdg_control );
@@ -345,12 +347,11 @@ bool pub_rangeMeter_config( uint8_t modo, uint16_t factor );
 #define WDG_CTL			1
 #define WDG_COUNT		2
 #define WDG_DAT			3
-
 #define WDG_OUT			4
 #define WDG_GPRSRX		5
 #define WDG_GPRSTX		6
 
-#define NRO_WDGS		4
+#define NRO_WDGS		7
 
 uint8_t wdg_resetCause;
 

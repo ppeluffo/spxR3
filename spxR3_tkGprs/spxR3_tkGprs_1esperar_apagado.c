@@ -18,6 +18,9 @@ static bool pv_tkGprs_check_inside_pwrSave(void);
 static void pv_tkGprs_calcular_tiempo_espera(void);
 static bool pv_tkGprs_procesar_signals_espera( bool *exit_flag );
 
+// La tarea pasa por el mismo lugar c/1s.
+#define WDG_GPRS_TO_ESPERA	30
+
 //------------------------------------------------------------------------------------
 bool st_gprs_esperar_apagado(void)
 {
@@ -49,19 +52,16 @@ bool exit_flag = false;
 //	IO_clr_PWR_SLEEP();
 	while ( ! exit_flag )  {
 
-		//xprintf_P(PSTR("DEBUG: signal in %d\r\n\0"),exit_flag );
 		// Reinicio el watchdog
-		pub_ctl_watchdog_kick(WDG_GPRSTX, ( waiting_time + 300));
+		pub_ctl_watchdog_kick(WDG_GPRSTX, WDG_GPRS_TO_ESPERA );
 
 		// Espero de a 5s para poder entrar en tickless.
 		vTaskDelay( (portTickType)( 5000 / portTICK_RATE_MS ) );
 		waiting_time -= 5;
 
-		//xprintf_P(PSTR("DEBUG: %d\r\n\0"),waiting_time );
 		// Proceso las señales
 		if ( pv_tkGprs_procesar_signals_espera( &exit_flag )) {
 			// Si recibi alguna senal, debo salir.
-			//xprintf_P(PSTR("DEBUG: signal out %d\r\n\0"),exit_flag );
 			goto EXIT;
 		}
 

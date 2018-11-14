@@ -47,6 +47,8 @@ static void pv_cmd_rwACH(uint8_t cmd_mode );
 static void pv_cmd_rangeMeter_config( char *modo, char *factor);
 static void pv_cmd_read_fuses(void);
 static void pv_cmd_config_outputs( char *param0, char *param1, char *param2 );
+static void pv_cmd_rCTLPINS(void);
+static bool pv_cmd_wrOFFSET( char *s_param0, char *s_param1 );
 
 #define WR_CMD 0
 #define RD_CMD 1
@@ -100,10 +102,10 @@ uint8_t ticks;
 		pub_ctl_watchdog_kick(WDG_CMD, WDG_CMD_TIMEOUT);
 
 		// Si no tengo terminal conectada, duermo 5s lo que me permite entrar en tickless.
-//		if ( IO_read_TERMCTL_PIN() == 0 ) {
-//			vTaskDelay( ( TickType_t)( 5000 / portTICK_RATE_MS ) );
+		if ( IO_read_TERMCTL_PIN() == 0 ) {
+			vTaskDelay( ( TickType_t)( 5000 / portTICK_RATE_MS ) );
 
-//		} else {
+		} else {
 
 			c = '\0';	// Lo borro para que luego del un CR no resetee siempre el timer.
 			// el read se bloquea 50ms. lo que genera la espera.
@@ -111,7 +113,7 @@ uint8_t ticks;
 			while ( frtos_read( fdTERM, (char *)&c, 1 ) == 1 ) {
 				FRTOS_CMD_process(c);
 			}
-//		}
+		}
 	}
 }
 //------------------------------------------------------------------------------------
@@ -270,7 +272,7 @@ FAT_t l_fat;
 	if ( systemVars.modo == MODO_SPX ) {
 
 		for ( channel = 0; channel < NRO_ANALOG_CHANNELS; channel++) {
-			xprintf_P( PSTR("  a%d( ) [%d-%d mA/ %.02f,%.02f | %04d | %s]\r\n\0"),channel, systemVars.imin[channel],systemVars.imax[channel],systemVars.mmin[channel],systemVars.mmax[channel], systemVars.coef_calibracion[channel], systemVars.a_ch_name[channel] );
+			xprintf_P( PSTR("  a%d( ) [%d-%d mA/ %.02f,%.02f | %04d | %.02f | %s]\r\n\0"),channel, systemVars.imin[channel],systemVars.imax[channel],systemVars.mmin[channel],systemVars.mmax[channel], systemVars.coef_calibracion[channel], systemVars.mag_offset[channel], systemVars.a_ch_name[channel] );
 		}
 
 		for ( channel = 0; channel < NRO_DIGITAL_CHANNELS; channel++) {
@@ -579,6 +581,14 @@ float mag_val;
 		return;
 	}
 
+	// CTLPINS
+	// read cltpins
+	if (!strcmp_P( strupr(argv[1]), PSTR("CTLPINS\0")) && ( tipo_usuario == USER_TECNICO) ) {
+		pv_cmd_rCTLPINS();
+		return;
+	}
+
+
 	// CMD NOT FOUND
 	xprintf_P( PSTR("ERROR\r\nCMD NOT DEFINED\r\n\0"));
 	return;
@@ -815,6 +825,21 @@ bool retS = false;
 		return;
 	}
 
+	// config autocal {ch} {mag}
+	if (!strcmp_P( strupr(argv[1]), PSTR("AUTOCAL\0")) ) {
+		retS = pub_analog_autocalibrar( atoi(argv[2]), argv[3] );
+		retS ? pv_snprintfP_OK() : pv_snprintfP_ERR();
+		return;
+	}
+
+	// config offset {ch} {mag}
+	if (!strcmp_P( strupr(argv[1]), PSTR("OFFSET\0")) ) {
+		retS = pv_cmd_wrOFFSET( argv[2], argv[3] );
+		retS ? pv_snprintfP_OK() : pv_snprintfP_ERR();
+		return;
+	}
+
+
 	pv_snprintfP_ERR();
 	return;
 
@@ -859,6 +884,7 @@ static void cmdHelpFunction(void)
 			xprintf_P( PSTR("  gprs (rsp,rts,dcd,ri)\r\n\0"));
 			xprintf_P( PSTR("  dist\r\n\0"));
 			xprintf_P( PSTR("  fuses\r\n\0"));
+			xprintf_P( PSTR("  ctlpins\r\n\0"));
 		}
 		return;
 
@@ -894,6 +920,8 @@ static void cmdHelpFunction(void)
 		xprintf_P( PSTR("  pwrsave modo [{on|off}] [{hhmm1}, {hhmm2}]\r\n\0"));
 		xprintf_P( PSTR("  apn, port, ip, script, passwd\r\n\0"));
 		xprintf_P( PSTR("  debug {none,gprs,counter,range}\r\n\0"));
+		xprintf_P( PSTR("  autocal {ch} {mag}\r\n\0"));
+		xprintf_P( PSTR("  offset {ch} {mag}\r\n\0"));
 		xprintf_P( PSTR("  default {sp5k | spx}\r\n\0"));
 		xprintf_P( PSTR("  save\r\n\0"));
 		return;
@@ -1808,9 +1836,9 @@ uint8_t fuse0,fuse1,fuse2,fuse4,fuse5;
 	fuse5 = nvm_fuses_read(0x05);	// FUSE5
 	xprintf_P( PSTR("FUSE5=0x%x\r\n\0"),fuse5);
 
-	if ( (fuse0 != 0xFF) || ( fuse1 != 0xAA) || (fuse2 != 0xFD) || (fuse4 != 0xF5) || ( fuse5 != 0xD4) ) {
+	if ( (fuse0 != 0xFF) || ( fuse1 != 0xAA) || (fuse2 != 0xFD) || (fuse4 != 0xF5) || ( fuse5 != 0xD6) ) {
 		xprintf_P( PSTR("FUSES ERROR !!!.\r\n\0"));
-		xprintf_P( PSTR("Los valores deben ser: FUSE0=0xFF,FUSE1=0xAA,FUSE2=0xFD,FUSE4=0xF5,FUSE5=0xD4\r\n\0"));
+		xprintf_P( PSTR("Los valores deben ser: FUSE0=0xFF,FUSE1=0xAA,FUSE2=0xFD,FUSE4=0xF5,FUSE5=0xD6\r\n\0"));
 		xprintf_P( PSTR("Deben reconfigurarse !!.\r\n\0"));
 		pv_snprintfP_ERR();
 		return;
@@ -1819,4 +1847,34 @@ uint8_t fuse0,fuse1,fuse2,fuse4,fuse5;
 	return;
 }
 //------------------------------------------------------------------------------------
+static void pv_cmd_rCTLPINS(void)
+{
+	// Leo los pines de BAUD y de TERMINAL
 
+uint8_t baud_pin, term_pin;
+
+	term_pin = IO_read_TERMCTL_PIN();
+	baud_pin =  IO_read_BAUD_PIN();
+	xprintf_P( PSTR("BAUD_PIN=%d\r\n\0"),baud_pin);
+	xprintf_P( PSTR("TERM_PIN=%d\r\n\0"),term_pin);
+	pv_snprintfP_OK();
+
+}
+//------------------------------------------------------------------------------------
+static bool pv_cmd_wrOFFSET( char *s_param0, char *s_param1 )
+{
+	// Configuro el parametro offset de un canal analogico.
+
+uint8_t channel;
+float offset;
+
+	channel = atoi(s_param0);
+	if ( ( channel >=  0) && ( channel < NRO_ANALOG_CHANNELS) ) {
+		offset = atof(s_param1);
+		systemVars.mag_offset[channel] = offset;
+		return(true);
+	}
+
+	return(false);
+}
+//------------------------------------------------------------------------------------
