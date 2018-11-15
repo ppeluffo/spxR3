@@ -21,6 +21,7 @@ static uint8_t pv_gprs_config_digitalCh(uint8_t channel);
 static uint8_t pv_gprs_config_AnalogCh(uint8_t channel);
 static uint8_t pv_gprs_config_Outputs(void);
 static uint8_t pv_gprs_config_RangeMeter(void);
+static uint8_t pv_gprs_config_counterCh(uint8_t channel);
 
 static void pv_TX_init_parameters_modo_SP5K(void);
 static void pv_TX_init_parameters_modo_SPX(void);
@@ -312,8 +313,10 @@ uint8_t saveFlag = 0;
 	// Canales digitales
 	saveFlag += pv_gprs_config_digitalCh(0);
 	saveFlag += pv_gprs_config_digitalCh(1);
-	saveFlag += pv_gprs_config_digitalCh(2);
-	saveFlag += pv_gprs_config_digitalCh(3);
+
+	// Canales de contadores
+	saveFlag += pv_gprs_config_counterCh(0);
+	saveFlag += pv_gprs_config_counterCh(1);
 
 	// Outputs/Consignas
 	saveFlag += pv_gprs_config_Outputs();
@@ -693,6 +696,64 @@ char *chName;
 
 	if ( systemVars.debug == DEBUG_GPRS ) {
 		xprintf_P( PSTR("GPRS: Reconfig D%d\r\n\0"), channel);
+	}
+
+quit:
+
+	return(ret);
+
+}
+//--------------------------------------------------------------------------------------
+static uint8_t pv_gprs_config_counterCh(uint8_t channel)
+{
+
+//	La linea recibida es del tipo:
+//	<h1>INIT_OK:CLOCK=1402251122:TPOLL=600:TDIAL=10300:PWRM=DISC:A0=pA,0,20,0,6:A1=pB,0,20,0,10:A2=pC,0,20,0,10:D0=C,q0,1.00:D1=L,q1</h1>
+//
+//  C0=q0,1.00:C1=q1,1.45
+//
+uint8_t ret = 0;
+char localStr[32];
+char *stringp;
+char *token;
+char *delim = ",=:><";
+char *chName, *chMagPP;
+
+	switch (channel) {
+	case 0:
+		stringp = strstr( (const char *)&pv_gprsRxCbuffer.buffer, "C0=");
+		break;
+	case 1:
+		stringp = strstr( (const char *)&pv_gprsRxCbuffer.buffer, "C1=");
+		break;
+	default:
+		ret = 0;
+		goto quit;
+		break;
+	}
+
+	if ( stringp == NULL ) {
+		// No viene configuracion de C0 ni de C1.
+		ret = 0;
+		goto quit;
+	}
+
+	// Copio el mensaje enviado ( solo 32 bytes ) a un buffer local porque la funcion strsep lo modifica.
+	memset(localStr,'\0',32);
+	memcpy(localStr,stringp, 31);
+
+	stringp = localStr;
+	token = strsep(&stringp,delim);	// C0
+
+	if ( systemVars.modo == MODO_SPX ) {
+		chName = strsep(&stringp,delim);	//name
+		chMagPP = strsep(&stringp,delim);	//magPP
+		pub_counters_config_channel( channel, chName, chMagPP );
+		ret = 1;
+	}
+
+	if ( systemVars.debug == DEBUG_GPRS ) {
+		xprintf_P( PSTR("GPRS: Reconfig C%d\r\n\0"), channel);
 	}
 
 quit:

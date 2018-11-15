@@ -153,7 +153,7 @@ void pub_gprs_load_defaults(modo_t modo)
 #ifdef APP_SPX_SPYMOVIL
 		snprintf_P( systemVars.apn, APN_LENGTH, PSTR("SPYMOVIL.VPNANTEL\0") );
 		strncpy_P(systemVars.server_ip_address, PSTR("192.168.0.9\0"),16);
-		strncpy_P(systemVars.serverScript, PSTR("/cgi-bin/spx/spx.pl\0"),SCRIPT_LENGTH);
+		strncpy_P(systemVars.serverScript, PSTR("/cgi-bin/spx/spxR3.pl\0"),SCRIPT_LENGTH);
 #endif
 		break;
 	default:

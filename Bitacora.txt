@@ -1,6 +1,11 @@
 Bitacora de cambios de Firmware SPXR3
 
 -----------------------------------------------------------------------
+2018-Nov-15:
+Version 1.0.1
+1- Modifico que el script al que accede sea spxR3.pl
+
+-----------------------------------------------------------------------
 2018-Nov-13:
 Version 1.0.0
 Version inicial basada en el SPXR1.
