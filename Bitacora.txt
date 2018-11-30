@@ -1,10 +1,27 @@
 Bitacora de cambios de Firmware SPXR3
 
 -----------------------------------------------------------------------
+Version 1.0.5 @ 2018-Nov-30
+- Incorporo un parametro counter_debounce_time. Se configura solo por comando,
+por defecto esta en 50ms y permite mejorar la presicion del contador de pulsos.
+
+2018-Nov-29:
+Version 1.0.4:
+-Tenemos problemas con la deteccion del modo TERMINAL y la reconfiguracion
+ de USB y BTOOTH del puerto serial.
+ La modificacion consiste en que el puerto serial de la terminal se configura
+ solo una vez al inicio, dependiendo de la terminal conectada.
+ Para cambiarlo, hay que resetear el datalogger.
+ 
+-----------------------------------------------------------------------
 2018-Nov-15:
 Version 1.0.1
 1- Modifico que el script al que accede sea spxR3.pl
-
+2- Utilzamos la nueva nomenclatura:
+   SPXR3_S: Datalogges chichos.
+   SPXR3_L: Dataloggers grandes ( 9 canales ).
+3- En los dataloggers 'S', las salidas son SOLO PARA CONSIGNAS por lo
+   tanto elimino todo lo referente al modo NORMAL.
 -----------------------------------------------------------------------
 2018-Nov-13:
 Version 1.0.0

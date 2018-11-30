@@ -237,6 +237,7 @@ FAT_t l_fat;
 	xprintf_P( PSTR("  timerDial: [%lu s]/%li\r\n\0"),systemVars.timerDial, pub_gprs_readTimeToNextDial() );
 	xprintf_P( PSTR("  timerPoll: [%d s]/%d\r\n\0"),systemVars.timerPoll, pub_ctl_readTimeToNextPoll() );
 	xprintf_P( PSTR("  timerPwrSensor: [%d s]\r\n\0"),systemVars.pwr_settle_time );
+	xprintf_P( PSTR("  counterDebounce: [%d s]\r\n\0"),systemVars.counter_debounce_time );
 
 	// PULSE WIDTH
 	if ( systemVars.rangeMeter_enabled == modoRANGEMETER_ON ) {
@@ -259,9 +260,6 @@ FAT_t l_fat;
 		break;
 	case OUT_CONSIGNA:
 		xprintf_P( PSTR("  outputs: CONSIGNA(c_dia=%02d:%02d, c_noche=%02d:%02d)\r\n"), systemVars.outputs.consigna_diurna.hour, systemVars.outputs.consigna_diurna.min, systemVars.outputs.consigna_nocturna.hour, systemVars.outputs.consigna_nocturna.min );
-		break;
-	case OUT_NORMAL:
-		xprintf_P( PSTR("  outputs: NORMAL (out_A=%d, out_B=%d)\r\n"), systemVars.outputs.out_A, systemVars.outputs.out_B );
 		break;
 	default:
 		xprintf_P( PSTR("  outputs: ERROR(%d) (out_A=%d, out_B=%d)\r\n"), systemVars.outputs.modo, systemVars.outputs.out_A, systemVars.outputs.out_B );
@@ -438,20 +436,6 @@ static void cmdWriteFunction(void)
 		}
 
 		pv_snprintfP_ERR();
-		return;
-	}
-
-	// OUTPUTS
-	// write outputs {x,x}
-	// Debo esperar para que se carguen los condensadores
-	if (!strcmp_P( strupr(argv[1]), PSTR("OUTPUTS\0")) && ( tipo_usuario == USER_TECNICO) ) {
-		if ( systemVars.outputs.modo != OUT_NORMAL ) {
-			xprintf_P( PSTR("ERROR\r\nOutput mode no compatible!!\r\n\0"));
-			return;
-		}
-		pub_output_set_outputs( 'A', atoi(argv[2]) );
-		pub_output_set_outputs( 'B', atoi(argv[3]) );
-		pv_snprintfP_OK();
 		return;
 	}
 
@@ -719,6 +703,13 @@ bool retS = false;
 		return;
 	}
 
+	// config counter_debounce_time
+	if (!strcmp_P( strupr(argv[1]), PSTR("CDTIME\0")) ) {
+		pub_counter_config_cdtime( argv[2] );
+		pv_snprintfP_OK();
+		return;
+	}
+
 	// config calibrar
 	if (!strcmp_P( strupr(argv[1]), PSTR("CFACTOR\0"))) {
 		pub_analog_config_spanfactor( atoi(argv[2]), argv[3] );
@@ -863,7 +854,6 @@ static void cmdHelpFunction(void)
 			xprintf_P( PSTR("  out { (enable|disable),(set|reset),(sleep|awake),(ph01|ph10) } {A/B}\r\n\0"));
 			xprintf_P( PSTR("      valve (open|close) (A|B) (ms)\r\n\0"));
 			xprintf_P( PSTR("      power {on|off}\r\n\0"));
-			xprintf_P( PSTR("  outputs (0|1) (0|1)\r\n\0"));
 			xprintf_P( PSTR("  gprs (pwr|sw|cts|dtr) {on|off}\r\n\0"));
 			xprintf_P( PSTR("      cmd {atcmd}, redial\r\n\0"));
 			xprintf_P( PSTR("  pulse {on|off}\r\n\0"));
@@ -915,12 +905,13 @@ static void cmdHelpFunction(void)
 
 		xprintf_P( PSTR("  cfactor {ch} {coef}\r\n\0"));
 		xprintf_P( PSTR("  rangemeter {on|off} factor\r\n\0"));
-		xprintf_P( PSTR("  outputs {off}|{normal}|{consigna hhmm_dia hhmm_noche}\r\n\0"));
+		xprintf_P( PSTR("  outputs (off | consigna) {hhmm_dia hhmm_noche}\r\n\0"));
 		xprintf_P( PSTR("  timerpoll, timerdial, dlgid {name}, sensortime\r\n\0"));
 		xprintf_P( PSTR("  pwrsave modo [{on|off}] [{hhmm1}, {hhmm2}]\r\n\0"));
 		xprintf_P( PSTR("  apn, port, ip, script, passwd\r\n\0"));
 		xprintf_P( PSTR("  debug {none,gprs,counter,range}\r\n\0"));
 		xprintf_P( PSTR("  autocal {ch} {mag}\r\n\0"));
+		xprintf_P( PSTR("  cdtime {val}\r\n\0"));
 		xprintf_P( PSTR("  offset {ch} {mag}\r\n\0"));
 		xprintf_P( PSTR("  default {sp5k | spx}\r\n\0"));
 		xprintf_P( PSTR("  save\r\n\0"));
@@ -1795,8 +1786,6 @@ uint16_t hhmm2 = 0;
 		modo = OUT_OFF;
 	} else if (!strcmp_P( strupr(param0), PSTR("CONSIGNA\0")) ) {
 		modo = OUT_CONSIGNA;
-	} else if (!strcmp_P( strupr(param0), PSTR("NORMAL\0")) ) {
-		modo = OUT_NORMAL;
 	} else {
 		pv_snprintfP_ERR();
 		return;

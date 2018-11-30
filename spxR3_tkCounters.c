@@ -64,7 +64,8 @@ const TickType_t xMaxBlockTime = pdMS_TO_TICKS( 10000 );
 				xprintf_P( PSTR("COUNTERS: C0=%d,C1=%d\r\n\0"),(uint16_t) cframe.counters[0], (uint16_t) cframe.counters[1]);
 			}
 			// Espero 10ms de debounced
-			vTaskDelay( ( TickType_t)( 50 / portTICK_RATE_MS ) );
+			//vTaskDelay( ( TickType_t)( 50 / portTICK_RATE_MS ) );
+			vTaskDelay( ( TickType_t)( systemVars.counter_debounce_time / portTICK_RATE_MS ) );
 
 			IO_clr_CLRD();		// Borro el latch llevandolo a 0.
 			IO_set_CLRD();		// Lo dejo en reposo en 1
@@ -171,6 +172,9 @@ void pub_counters_load_defaults(void)
 	systemVars.c_ch_magpp[0] = 0.1;
 	systemVars.c_ch_magpp[1] = 0.1;
 
+	// Debounce Time
+	systemVars.counter_debounce_time = 50;
+
 }
 //------------------------------------------------------------------------------------
 bool pub_counters_config_channel( uint8_t channel,char *s_param0, char *s_param1 )
@@ -200,3 +204,21 @@ bool retS = false;
 
 }
 //------------------------------------------------------------------------------------
+void pub_counter_config_cdtime( char *s_sensortime )
+{
+	// Configura el tiempo de debounce del conteo de pulsos
+
+	while ( xSemaphoreTake( sem_SYSVars, ( TickType_t ) 5 ) != pdTRUE )
+		taskYIELD();
+
+	systemVars.counter_debounce_time = atoi(s_sensortime);
+
+	if ( systemVars.counter_debounce_time < 1 )
+		systemVars.pwr_settle_time = 50;
+
+	xSemaphoreGive( sem_SYSVars );
+	return;
+}
+//------------------------------------------------------------------------------------
+
+

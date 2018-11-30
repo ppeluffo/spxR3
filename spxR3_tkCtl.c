@@ -64,7 +64,7 @@ void tkCtl(void * pvParameters)
 		pv_tkCtl_check_wdg();
 		pv_tkCtl_ajust_timerPoll();
 		pv_daily_reset();
-		pv_tkCtl_check_terminal();
+//		pv_tkCtl_check_terminal();
 
 	}
 }

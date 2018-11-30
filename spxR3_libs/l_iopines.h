@@ -130,6 +130,7 @@ uint8_t IO_read_PB2(void);
 uint8_t IO_read_PA2(void);
 
 //------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------
 // PULSOS
 
 #define UPULSE_RUN_BITPOS		4
@@ -189,6 +190,14 @@ uint8_t IO_read_UPULSE_WIDTH(void);
 #define IO_config_ENA()		PORT_SetPinAsOutput( &ENA_PORT, ENA_BITPOS)
 #define IO_set_ENA()		PORT_SetOutputBit( &ENA_PORT, ENA_BITPOS)
 #define IO_clr_ENA()		PORT_ClearOutputBit( &ENA_PORT, ENA_BITPOS)
+
+//------------------------------------------------------------------------------------
+
+#define V12_OUTS_CTL_BITPOS			3
+#define V12_OUTS_CTL_PORT			PORTA
+#define IO_config_V12_OUTS_CTL()	PORT_SetPinAsOutput( & V12_OUTS_CTL_PORT,  V12_OUTS_CTL_BITPOS)
+#define IO_set_V12_OUTS_CTL()		PORT_SetOutputBit( & V12_OUTS_CTL_PORT,  V12_OUTS_CTL_BITPOS)
+#define IO_clr_V12_OUTS_CTL()		PORT_ClearOutputBit( & V12_OUTS_CTL_PORT,  V12_OUTS_CTL_BITPOS)
 
 //------------------------------------------------------------------------------------
 // GPRS

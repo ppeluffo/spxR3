@@ -25,6 +25,9 @@ void initMCU(void)
 	// TERMINAL CTL PIN
 	IO_config_TERMCTL_PIN();
 
+	// BAUD RATE PIN
+	IO_config_BAUD_PIN();
+
 	// INPUTS DIGITAL
 	IO_config_PA0();		// D0
 	IO_config_PA2();

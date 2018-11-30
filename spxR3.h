@@ -56,8 +56,8 @@
 //------------------------------------------------------------------------------------
 // DEFINES
 //------------------------------------------------------------------------------------
-#define SPX_FW_REV "1.0.2.R3"
-#define SPX_FW_DATE "@ 20181115"
+#define SPX_FW_REV "1.0.5.R3"
+#define SPX_FW_DATE "@ 20181130"
 
 #define SPX_HW_MODELO "spxR3 HW:xmega256A3B R1.1"
 #define SPX_FTROS_VERSION "FW:FRTOS10 TICKLESS"
@@ -150,7 +150,7 @@ char stdout_buff[CHAR64];
 
 //------------------------------------------------------------------------------------
 typedef enum { DEBUG_NONE = 0, DEBUG_GPRS, DEBUG_RANGEMETER, DEBUG_COUNTER } t_debug;
-typedef enum { OUT_OFF = 0, OUT_CONSIGNA, OUT_NORMAL } t_outputs;
+typedef enum { OUT_OFF = 0, OUT_CONSIGNA } t_outputs;
 typedef enum { CONSIGNA_DIURNA = 0, CONSIGNA_NOCTURNA } t_consigna_aplicada;
 typedef enum { modoPWRSAVE_OFF = 0, modoPWRSAVE_ON } t_pwrSave;
 typedef enum { USER_NORMAL, USER_TECNICO } usuario_t;
@@ -243,6 +243,8 @@ typedef struct {
 	uint16_t timerPoll;
 	uint32_t timerDial;
 
+	uint8_t counter_debounce_time;
+
 	uint8_t csq;
 	uint8_t dbm;
 	t_debug debug;
@@ -314,6 +316,7 @@ void pub_data_read_frame(bool wdg_control);
 void pub_counters_read_frame( st_counter_inputs_t cntframe[], bool reset_counters );
 void pub_counters_load_defaults(void);
 bool pub_counters_config_channel( uint8_t channel,char *s_param0, char *s_param1 );
+void pub_counter_config_cdtime( char *s_sensortime );
 
 // tkCtl
 void pub_ctl_watchdog_kick(uint8_t taskWdg, uint16_t timeout_in_secs );

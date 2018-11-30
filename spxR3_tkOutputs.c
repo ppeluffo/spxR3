@@ -7,15 +7,11 @@
 
 #include "spxR3.h"
 
-static 	uint8_t l_out_A, l_out_B;
-
 static void pv_out_chequear(void);
 static void pv_out_check_consignas(void);
-static void pv_out_check_outputs_normales(void);
 static void pv_out_init(void);
 static void pv_out_init_outputs_off(void);
 static void pv_out_init_consignas(void);
-static void pv_out_init_outputs_normales(void);
 
 static bool reinit_consignas;
 
@@ -67,9 +63,6 @@ static void pv_out_chequear(void)
 	case OUT_CONSIGNA:
 		pv_out_check_consignas();
 		break;
-	case OUT_NORMAL:
-		pv_out_check_outputs_normales();
-		break;
 	}
 }
 //------------------------------------------------------------------------------------
@@ -101,23 +94,6 @@ int8_t xBytes;
 
 }
 //------------------------------------------------------------------------------------
-static void pv_out_check_outputs_normales(void)
-{
-
-
-	// Solo cambio las salidas si cambio el systemVars.
-	if ( l_out_A != systemVars.outputs.out_A) {
-		l_out_A = systemVars.outputs.out_A;
-		( l_out_A == 0 ) ?	pub_output_set_outputs( 'A', 0 ) : pub_output_set_outputs( 'A', 1 );
-	}
-
-	if ( l_out_B != systemVars.outputs.out_B ) {
-		l_out_B = systemVars.outputs.out_B;
-		( l_out_B == 0 ) ?	pub_output_set_outputs( 'B', 0 ) : pub_output_set_outputs( 'B', 1 );
-	}
-
-}
-//------------------------------------------------------------------------------------
 static void pv_out_init(void)
 {
 
@@ -129,9 +105,6 @@ static void pv_out_init(void)
 		break;
 	case OUT_CONSIGNA:
 		pv_out_init_consignas();
-		break;
-	case OUT_NORMAL:
-		pv_out_init_outputs_normales();
 		break;
 	}
 
@@ -229,28 +202,6 @@ uint8_t xBytes;
 
 }
 //------------------------------------------------------------------------------------
-static void pv_out_init_outputs_normales(void)
-{
-	// Aplica el valor indicado en systemVars a las salidas.
-
-	OUT_power_on();
-	vTaskDelay( ( TickType_t)(2000 / portTICK_RATE_MS ) );
-
-	OUT_driver('A', OUT_ENABLE);
-	OUT_driver('A', OUT_AWAKE);
-	OUT_driver('B', OUT_ENABLE);
-	OUT_driver('B', OUT_AWAKE);
-
-	vTaskDelay( ( TickType_t)( 100 / portTICK_RATE_MS ) );
-
-	l_out_A = systemVars.outputs.out_A;
-	l_out_B = systemVars.outputs.out_B;
-
-	( l_out_A == 0 ) ?	pub_output_set_outputs( 'A', 0 ) : pub_output_set_outputs( 'A', 1 );
-	( l_out_B == 0 ) ?	pub_output_set_outputs( 'B', 0 ) : pub_output_set_outputs( 'B', 1 );
-
-}
-//------------------------------------------------------------------------------------
 // FUNCIONES PUBLICAS
 //------------------------------------------------------------------------------------
 void pub_output_load_defaults(void)
@@ -285,14 +236,6 @@ void pub_output_config( t_outputs modo, uint16_t hhmm1, uint16_t hhmm2 )
 		reinit_consignas = true;
 //		xprintf_P( PSTR("DEBUG OUTPUTS CONSIGNA: (modo=%d\r\n\0"), systemVars.outputs.modo);
 		break;
-	case OUT_NORMAL:
-		systemVars.outputs.modo = OUT_NORMAL;
-		systemVars.outputs.out_A = 0;
-		systemVars.outputs.out_B = 0;
-//		xprintf_P( PSTR("DEBUG OUTPUTS NORMAL: (modo=%d\r\n\0"), systemVars.outputs.modo);
-
-		break;
-
 	}
 
 }
