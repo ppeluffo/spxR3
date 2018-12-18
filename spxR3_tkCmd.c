@@ -102,7 +102,8 @@ uint8_t ticks;
 		pub_ctl_watchdog_kick(WDG_CMD, WDG_CMD_TIMEOUT);
 
 		// Si no tengo terminal conectada, duermo 5s lo que me permite entrar en tickless.
-		if ( IO_read_TERMCTL_PIN() == 0 ) {
+		if ( ! terminal_connected() ) {
+
 			vTaskDelay( ( TickType_t)( 5000 / portTICK_RATE_MS ) );
 
 		} else {

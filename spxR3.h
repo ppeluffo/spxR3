@@ -56,8 +56,8 @@
 //------------------------------------------------------------------------------------
 // DEFINES
 //------------------------------------------------------------------------------------
-#define SPX_FW_REV "1.0.5.R3"
-#define SPX_FW_DATE "@ 20181130"
+#define SPX_FW_REV "1.0.6.R3"
+#define SPX_FW_DATE "@ 20181218"
 
 #define SPX_HW_MODELO "spxR3 HW:xmega256A3B R1.1"
 #define SPX_FTROS_VERSION "FW:FRTOS10 TICKLESS"
@@ -324,6 +324,7 @@ void pub_ctl_print_wdg_timers(void);
 void pub_ctl_print_stack_watermarks(void);
 uint16_t pub_ctl_readTimeToNextPoll(void);
 void pub_ctl_reload_timerPoll(void);
+bool terminal_connected(void);
 
 // tkGprs
 int32_t pub_gprs_readTimeToNextDial(void);

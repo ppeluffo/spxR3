@@ -17,6 +17,7 @@ static void pv_tkCtl_check_terminal(void);
 
 static uint16_t time_to_next_poll;
 static uint16_t watchdog_timers[NRO_WDGS];
+static bool f_terminal_connected;
 
 // Timpo que espera la tkControl entre round-a-robin
 #define TKCTL_DELAY_S	5
@@ -64,7 +65,7 @@ void tkCtl(void * pvParameters)
 		pv_tkCtl_check_wdg();
 		pv_tkCtl_ajust_timerPoll();
 		pv_daily_reset();
-//		pv_tkCtl_check_terminal();
+		pv_tkCtl_check_terminal();
 
 	}
 }
@@ -83,6 +84,11 @@ uint8_t wdg;
 	// Inicializo todos los watchdogs a 15s ( 3 * 5s de loop )
 	for ( wdg = 0; wdg < NRO_WDGS; wdg++ ) {
 		watchdog_timers[wdg] = (uint16_t)( 15 / TKCTL_DELAY_S );
+	}
+
+	f_terminal_connected = false;
+	if (  IO_read_TERMCTL_PIN() == 1 ) {
+		f_terminal_connected = true;
 	}
 
 	// Leo los parametros del la EE y si tengo error, cargo por defecto
@@ -127,7 +133,7 @@ uint8_t wdg;
 static void pv_tkCtl_wink_led(void)
 {
 	// SI la terminal esta desconectada salgo.
-	if ( IO_read_TERMCTL_PIN() == 0 )
+	if ( ! terminal_connected() )
 		return;
 
 	// Prendo los leds
@@ -221,6 +227,14 @@ static void pv_tkCtl_check_terminal(void)
 	// Cuando cambia de 0 a 1, debemos ver el pin BAUD para determinar si debemos
 	// configurar la uart a 9600 o 115200.
 
+
+	if ( IO_read_TERMCTL_PIN() == 1) {
+		f_terminal_connected = true;
+	} else {
+		f_terminal_connected = false;
+	}
+
+/*
 static uint8_t terminal_pin = 0;
 
 	// Cambio 0 a 1
@@ -239,7 +253,7 @@ static uint8_t terminal_pin = 0;
 		terminal_pin = 0;
 		return;
 	}
-
+*/
 }
 //------------------------------------------------------------------------------------
 // FUNCIONES PUBLICAS
@@ -326,6 +340,11 @@ UBaseType_t uxHighWaterMark;
 	xprintf_P( PSTR("GRX: %03d,%03d,[%03d]\r\n\0"),tkGprs_rx_STACK_SIZE,uxHighWaterMark, ( tkGprs_rx_STACK_SIZE - uxHighWaterMark));
 
 	
+}
+//------------------------------------------------------------------------------------
+bool terminal_connected(void)
+{
+	return(f_terminal_connected);
 }
 //------------------------------------------------------------------------------------
 
