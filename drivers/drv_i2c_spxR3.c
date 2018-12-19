@@ -178,7 +178,8 @@ uint8_t	reintentos = I2C_MAXTRIES;
 
 	while ( reintentos-- > 0 ) {
 
-		bus_status = TWIE.MASTER.STATUS; //& TWI_MASTER_BUSSTATE_gm;
+		//bus_status = TWIE.MASTER.STATUS; //& TWI_MASTER_BUSSTATE_gm;
+		bus_status = TWIE.MASTER.STATUS & 0xCF; 	//& TWI_MASTER_BUSSTATE_gm;
 
 #ifdef DEBUG_I2C
 		//	xprintf_P( PSTR("drv_i2c: I2C_BUSIDLE(%d): 0x%02x\r\n\0"),reintentos,TWIE.MASTER.STATUS );
