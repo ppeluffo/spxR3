@@ -19,7 +19,7 @@ static uint8_t pv_gprs_config_timerPoll(void);
 static uint8_t pv_gprs_config_timerDial(void);
 static uint8_t pv_gprs_config_digitalCh(uint8_t channel);
 static uint8_t pv_gprs_config_AnalogCh(uint8_t channel);
-static uint8_t pv_gprs_config_Outputs(void);
+static uint8_t pv_gprs_config_consignas(void);
 static uint8_t pv_gprs_config_RangeMeter(void);
 static uint8_t pv_gprs_config_counterCh(uint8_t channel);
 
@@ -318,8 +318,8 @@ uint8_t saveFlag = 0;
 	saveFlag += pv_gprs_config_counterCh(0);
 	saveFlag += pv_gprs_config_counterCh(1);
 
-	// Outputs/Consignas
-	saveFlag += pv_gprs_config_Outputs();
+	// Consignas
+	saveFlag += pv_gprs_config_consignas();
 
 	// RangeMeter
 	saveFlag += pv_gprs_config_RangeMeter();
@@ -762,7 +762,7 @@ quit:
 
 }
 //--------------------------------------------------------------------------------------
-static uint8_t pv_gprs_config_Outputs(void)
+static uint8_t pv_gprs_config_consignas(void)
 {
 	// La linea recibida es del tipo:
 	// <h1>INIT_OK:OUTS=modo,param1,param2:</h1>
@@ -781,7 +781,7 @@ t_outputs modo;
 uint16_t hhmm1, hhmm2;
 char *p;
 
-	p = strstr( (const char *)&pv_gprsRxCbuffer.buffer, "OUTS");
+	p = strstr( (const char *)&pv_gprsRxCbuffer.buffer, "CONS");
 	if ( p == NULL )
 		goto quit;
 

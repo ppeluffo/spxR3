@@ -56,8 +56,8 @@
 //------------------------------------------------------------------------------------
 // DEFINES
 //------------------------------------------------------------------------------------
-#define SPX_FW_REV "1.0.6.R3"
-#define SPX_FW_DATE "@ 20181218"
+#define SPX_FW_REV "1.0.9.R3"
+#define SPX_FW_DATE "@ 20190220"
 
 #define SPX_HW_MODELO "spxR3 HW:xmega256A3B R1.1"
 #define SPX_FTROS_VERSION "FW:FRTOS10 TICKLESS"
@@ -70,6 +70,7 @@
 
 // Compatibilidad del protocolo
 #define CONFIG_SPX_SPYMOVIL
+//#define CONFIG_SPX_OSE
 //#define CONFIG_SPX_TAHONA
 //#define CONFIG_SP5K_SPYMOVIL
 //#define CONFIG_SP5K_OSE
@@ -97,6 +98,12 @@
 	// Protocolo SP5K,App OSE
 	#define PROTO_SP5K
 	#define APP_SP5K_OSE
+#endif
+
+#ifdef CONFIG_SPX_OSE
+	// Protocolo SPX,App OSE
+	#define PROTO_SPX
+	#define APP_SPX_OSE
 #endif
 
 // El datalogger tiene 6 canales fisicos pero 5 disponibles

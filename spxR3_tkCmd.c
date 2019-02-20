@@ -132,6 +132,9 @@ FAT_t l_fat;
 	#ifdef APP_SPX_LATAHONA
 		xprintf_P( PSTR("Compilacion: SPX/TAHONA\r\n\0") );
 	#endif
+	#ifdef APP_SPX_OSE
+		xprintf_P( PSTR("Compilacion: SPX/OSE\r\n\0") );
+	#endif
 #endif
 
 #ifdef PROTO_SP5K

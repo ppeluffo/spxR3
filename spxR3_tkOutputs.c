@@ -28,8 +28,8 @@ void tkOutputs(void * pvParameters)
 	while ( !startTask )
 		vTaskDelay( ( TickType_t)( 100 / portTICK_RATE_MS ) );
 
-	pv_out_init();
-	reinit_consignas = false;
+	//pv_out_init();
+	reinit_consignas = true;
 
 	xprintf_P( PSTR("starting tkOutputs..\r\n\0"));
 
@@ -45,6 +45,7 @@ void tkOutputs(void * pvParameters)
 		// Si me indican que se reconfiguraron las consignas, debo
 		// reiniciarlas.
 		if ( reinit_consignas ) {
+			xprintf_P( PSTR("OUTPUTS: reinit consignas\r\n\0"));
 			reinit_consignas = false;
 			pv_out_init();
 		}
@@ -128,6 +129,8 @@ RtcTimeType_t rtcDateTime;
 uint16_t now, horaConsNoc, horaConsDia ;
 uint8_t consigna_a_aplicar = 99;
 uint8_t xBytes;
+
+	xprintf_P( PSTR("OUTPUTS: init consignas\r\n\0"));
 
 	// Hora actual en minutos.
 	xBytes = RTC_read_dtime(&rtcDateTime);
@@ -234,7 +237,7 @@ void pub_output_config( t_outputs modo, uint16_t hhmm1, uint16_t hhmm2 )
 		u_convert_int_to_time_t(hhmm1, &systemVars.outputs.consigna_diurna);
 		u_convert_int_to_time_t(hhmm2, &systemVars.outputs.consigna_nocturna);
 		reinit_consignas = true;
-//		xprintf_P( PSTR("DEBUG OUTPUTS CONSIGNA: (modo=%d\r\n\0"), systemVars.outputs.modo);
+		xprintf_P( PSTR("DEBUG OUTPUTS CONSIGNA: (modo=%d\r\n\0"), systemVars.outputs.modo);
 		break;
 	}
 
@@ -244,6 +247,8 @@ void pub_output_set_consigna_diurna(void)
 {
 	// En consigna diurna la valvula A (JP28) queda abierta y la valvula B (JP2) cerrada.
 	//
+
+	xprintf_P( PSTR("OUTPUTS: Aplico Consigna Diurna\r\n\0") );
 
 	// Proporciono corriente.
 	OUT_power_on();
@@ -257,11 +262,13 @@ void pub_output_set_consigna_diurna(void)
 	OUT_power_off();
 
 	systemVars.outputs.consigna_aplicada = CONSIGNA_DIURNA;
-	xprintf_P( PSTR("OUTPUTS: Aplico Consigna Diurna\r\n\0") );
+
 }
 //----------------------------------------------------------------------------------------
 void pub_output_set_consigna_nocturna(void)
 {
+
+	xprintf_P( PSTR("OUTPUTS: Aplico Consigna Nocturna\r\n\0") );
 
 	// Proporciono corriente.
 	OUT_power_on();
@@ -275,7 +282,7 @@ void pub_output_set_consigna_nocturna(void)
 	OUT_power_off();
 
 	systemVars.outputs.consigna_aplicada = CONSIGNA_NOCTURNA;
-	xprintf_P( PSTR("OUTPUTS: Aplico Consigna Nocturna\r\n\0") );
+
 }
 //----------------------------------------------------------------------------------------
 void pub_output_set_outputs( char id_output, uint8_t value)
